@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import UserRoutes from "./routes/userRoutes.js";
 import AdminRoutes from "./routes/adminRoutes.js";
+import FaqLogsRoutes from "./routes/faqLogsRoutes.js";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
+app.use("/api/faqlogs", FaqLogsRoutes);
 
 app.get("/", (req, res) => {
   res.send("FAQ microservices is running....");
