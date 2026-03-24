@@ -11,7 +11,11 @@ const faqSchema = new mongoose.Schema({
         default:'active',
         required: true
     },
-    video_url:{
+    videoUrl:{
+        type: String,
+        required: true
+    },
+    thumbnailUrl:{
         type: String,
         required: true
     },
