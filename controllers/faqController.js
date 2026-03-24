@@ -1,39 +1,47 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import s3 from "../config/s3.js";
-import Faq from "../models/Faq.js";
+import fs from "fs";
+import mongoose from "mongoose";
 
-// 🔹 Create FAQ (upload video + save data)
+import Faq from "../models/faqModel.js";
+import Category from "../models/Category.js";
+import { getVideoDuration } from "../services/videoService.js";
+import { uploadToS3 } from "../services/s3Service.js";
+
 export const createFaq = async (req, res) => {
   try {
-    const { title, status, tags, category } = req.body;
-
+    const { title, tags, categoryId } = req.body;
     const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({ error: "Video file is required" });
+    if (!title || !tags || !categoryId || !file) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // 🔥 Upload to S3
-    const key = `videos/${Date.now()}-${file.originalname}`;
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(400).json({ message: "Invalid category id" });
+    }
 
-    const params = {
-      Bucket: process.env.S3_BUCKET,
-      Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    };
+    const categoryExists = await Category.findById(categoryId);
+    if (!categoryExists) {
+      return res.status(404).json({ message: "Category not found" });
+    }
 
-    await s3.send(new PutObjectCommand(params));
+    // temp file
+    const tempPath = `./temp/${Date.now()}-${file.originalname}`;
+    fs.writeFileSync(tempPath, file.buffer);
 
-    const videoUrl = `https://${params.Bucket}.s3.amazonaws.com/${key}`;
+    // use helper
+    const duration = await getVideoDuration(tempPath);
 
-    // 🔥 Save to DB
+    // use S3 service
+    const videoUrl = await uploadToS3(file);
+
+    fs.unlinkSync(tempPath);
+
     const faq = await Faq.create({
       title,
-      status,
       tags,
-      category: Array.isArray(category) ? category : [category],
+      category: categoryId,
       video_url: videoUrl,
+      videoLength: duration,
     });
 
     res.status(201).json({
@@ -42,16 +50,16 @@ export const createFaq = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
-// 🔹 Get all FAQs
+// Get all FAQs
 export const getFaqs = async (req, res) => {
   try {
     const faqs = await Faq.find().sort({ createdAt: -1 });
-
+                                                    
     res.json({
       count: faqs.length,
       data: faqs,

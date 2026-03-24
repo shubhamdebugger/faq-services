@@ -1,5 +1,28 @@
 import mongoose from "mongoose";
 
+const faqSchema = new mongoose.Schema({
+    faqId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Faq"
+    },
+    duration:{
+        type: Number,
+        required: true
+    },
+    videoLength:{
+        type: Number,
+        required: true
+    },
+    isWatched:{
+        type: Boolean,
+        default: false
+    },
+    count:{
+        type: Number,
+        default: 0
+    }
+},{timestamps: true, versionKey: false})
+
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -21,7 +44,8 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             default: "user"
-        }
+        },
+        faq: [faqSchema]
     },
     {
         timestamps: true
