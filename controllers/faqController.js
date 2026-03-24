@@ -1,7 +1,7 @@
 import fs from "fs";
 import mongoose from "mongoose";
 import User from "../models/User.js"
-import Faq from "../models/faqModel.js";
+import Faq from "../models/Faq.js";
 import Category from "../models/Category.js";
 import { getVideoDuration } from "../services/videoService.js";
 import { uploadToS3 } from "../services/s3Service.js";
