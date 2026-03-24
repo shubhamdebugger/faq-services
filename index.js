@@ -18,5 +18,6 @@ app.use("/api/faqlogs", FaqLogsRoutes);
 app.get("/", (req, res) => {
   res.send("FAQ microservices is running....");
 });
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, console.log(`Server running on port ${PORT}`));
