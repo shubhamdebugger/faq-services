@@ -2,8 +2,8 @@
   "name": "faq-services",
   "version": "1.0.0",
   "description": "This is created for the faq section of application",
-  "license": "ISC",
-  "author": "shubham",
+  "license": "ISC", 
+  "author": "shubham & abhi",
   "type": "module",
   "main": "index.js",
   "scripts": {
