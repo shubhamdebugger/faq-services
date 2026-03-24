@@ -22,7 +22,7 @@ export const createFaqLog = async (req, res) => {
         message: "Invalid FAQ id",
       });
     }
-
+  
     // to check faq is valid or not
     const faq = await Faq.findById(faqId);
     if (!faq) {
