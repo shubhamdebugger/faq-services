@@ -48,7 +48,6 @@ export const createFaq = async (req, res) => {
       message: "FAQ created successfully",
       data: faq,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -64,7 +63,6 @@ export const getFaqs = async (req, res) => {
       count: faqs.length,
       data: faqs,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
