@@ -82,7 +82,7 @@ export const getFaqs = async (req, res) => {
     const faqs = await Faq.find().sort({ createdAt: -1 }).lean();
 
     // Get all users with faq progress
-    const users = await User.find({}, { faq: 1 }).lean();
+    const users = await User.find({}, { faq: 1, name:1 }).lean();
 
     // Map: faqId -> array of user data
     const faqUserMap = {};
@@ -98,6 +98,7 @@ export const getFaqs = async (req, res) => {
 
           faqUserMap[faqId].push({
             userId: user._id,
+            name: user.name,
             duration: item.duration || 0,
             isWatched: item.isWatched || false,
             count: item.count || 0,
@@ -127,6 +128,10 @@ export const getFaqs = async (req, res) => {
 export const getFaqsPerUSer = async (req, res) => {
   try {
     const userId = req.user.id;
+
+    if(!userId){
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
     // Get all FAQs
     const faqs = await Faq.find({ status: "active" }).sort({ createdAt: -1 }).lean();
