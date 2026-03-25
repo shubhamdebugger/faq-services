@@ -16,7 +16,7 @@ app.use(express.json());
 app.use("/api/users", UserRoutes);
 app.use("/api/admin", AdminRoutes);
 app.use("/api/faqlogs", FaqLogsRoutes);
-app.use("/api/faq", FaqRoutes);
+app.use("/api/faq-section", FaqRoutes);
 app.use("/api/category", CategoryRoutes);
 
 app.get("/", (req, res) => {

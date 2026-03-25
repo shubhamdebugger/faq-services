@@ -10,13 +10,13 @@ import { authorize } from "../middleware/authMiddleware.js";
 const router = express.Router();
 router.get("/v1/categories", getCategories);
 router.get(
-  "/v1/category/get-unique-search-category",
+  "/v1/get-unique-search-category",
   authorize("admin"),
   getUniqueSearchCategories,
 );
-router.post("/v1/category/create-category", authorize("admin"), createCategory);
+router.post("/v1/create-category", authorize("admin"), createCategory);
 router.post(
-  "/v1/category/create-unique-search",
+  "/v1/create-unique-search",
   authorize("user"),
   createUniqueSearchCategory,
 );

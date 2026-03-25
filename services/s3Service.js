@@ -13,5 +13,5 @@ export const uploadToS3 = async (file) => {
 
   await s3.send(new PutObjectCommand(params));
 
-  return `https://${params.Bucket}.s3.amazonaws.com/${key}`;
+  return `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };
