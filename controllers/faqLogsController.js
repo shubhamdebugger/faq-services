@@ -7,8 +7,8 @@ export const createFaqLog = async (req, res) => {
     const { faqId, duration } = req.body;
     const userId = req.user.id;
 
-    // validaion
-    if (!faqId || !userId || !duration) {
+    // validation
+    if (!faqId || !userId || duration === undefined) {
       return res.status(400).json({
         data: null,
         success: false,
@@ -16,7 +16,7 @@ export const createFaqLog = async (req, res) => {
       });
     }
 
-    // validation of faq
+    // validate faq id
     if (!mongoose.Types.ObjectId.isValid(faqId)) {
       return res.status(400).json({
         success: false,
@@ -24,43 +24,48 @@ export const createFaqLog = async (req, res) => {
       });
     }
 
-    // to check faq is valid or not
+    // check faq exists
     const faq = await Faq.findById(faqId);
     if (!faq) {
-      return res
-        .status(400)
-        .json({ data: null, success: false, message: "faq not found" });
+      return res.status(400).json({
+        data: null,
+        success: false,
+        message: "faq not found",
+      });
     }
 
-    // to get length of video
-    const videoLength = faq.videoLength;
+    // convert to whole seconds
+    const durationInSec = Math.floor(duration);
+    const videoLengthInSec = Math.floor(faq.videoLength);
 
-    // to get previous logs of faq
+    // buffer logic (5 sec)
+    const buffer = 5;
+    const isFullyWatched = durationInSec >= videoLengthInSec - buffer;
+
+    // get existing faq logs
     const user = await User.findOne(
       { _id: userId, "faq.faqId": faqId },
       { "faq.$": 1 },
     );
 
-    const existingFaqLogs = user?.faq?.[0]; // to get exsiting faq logs
-
-    const isFullyWatched = duration >= videoLength;
+    const existingFaqLogs = user?.faq?.[0];
 
     let updateQuery = {
       $set: {
-        "faq.$.duration": duration,
-        "faq.$.videoLength": videoLength,
+        "faq.$.duration": durationInSec,
+        "faq.$.videoLength": videoLengthInSec,
       },
     };
 
-    // CASE 1: First time entry exists
+    // CASE 1: Already exists
+
     if (existingFaqLogs) {
-      // If already watched once → always keep true
       const alreadyWatched = existingFaqLogs.isWatched;
 
+      // once true  always true
       updateQuery.$set["faq.$.isWatched"] = alreadyWatched || isFullyWatched;
 
-      // Increase count ONLY when:
-      // user completes video AND previously it was incomplete OR already watched again fully
+      // increment count ONLY when fully watched
       if (isFullyWatched) {
         updateQuery.$inc = {
           "faq.$.count": 1,
@@ -68,25 +73,30 @@ export const createFaqLog = async (req, res) => {
       }
 
       await User.updateOne({ _id: userId, "faq.faqId": faqId }, updateQuery);
-    } else {
+    }
+
+    //  First time
+    else {
       await User.findByIdAndUpdate(userId, {
         $push: {
           faq: {
             faqId,
-            duration,
-            videoLength,
+            duration: durationInSec,
+            videoLength: videoLengthInSec,
             count: isFullyWatched ? 1 : 0,
             isWatched: isFullyWatched,
           },
         },
       });
-      // to increase total_seen in faq section
+
+      // increase total seen only first time
       await Faq.updateOne({ _id: faqId }, { $inc: { total_seen: 1 } });
     }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "FAQ logs maintained successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "FAQ logs maintained successfully",
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
