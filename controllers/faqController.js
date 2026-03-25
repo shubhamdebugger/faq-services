@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import User from "../models/User.js"
 import Faq from "../models/Faq.js";
 import Category from "../models/Category.js";
-import { getVideoDuration } from "../services/videoService.js";
+import { getVideoDurationInSeconds } from "get-video-duration";
 import { uploadToS3 } from "../services/s3Service.js";
 
 export const createFaq = async (req, res) => {
@@ -35,13 +35,17 @@ export const createFaq = async (req, res) => {
     }
 
     tags = tags.map(tag => tag.trim().toLowerCase());
+    const tempDir = "./temp";
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
 
     // TEMP FILE for duration
-    const tempPath = `./temp/${Date.now()}-${videoFile.originalname}`;
+    const tempPath = `${tempDir}/${Date.now()}-${videoFile.originalname}`;
     fs.writeFileSync(tempPath, videoFile.buffer);
 
     // Get video duration
-    const duration = await getVideoDuration(tempPath);
+    const duration = await getVideoDurationInSeconds(tempPath);
 
     // Upload video
     const videoUrl = await uploadToS3(videoFile);
@@ -57,8 +61,8 @@ export const createFaq = async (req, res) => {
       title: title.trim(),
       tags,
       category: categoryId,
-      videoUrl,        
-      thumbnailUrl,   
+      videoUrl,
+      thumbnailUrl,
       videoLength: duration,
     });
 
