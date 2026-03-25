@@ -1,5 +1,9 @@
 import express from "express";
-import { getFaqs, createFaq, getFaqsPerUSer } from "../controllers/faqController.js";
+import {
+  getFaqs,
+  createFaq,
+  getFaqsPerUSer,
+} from "../controllers/faqController.js";
 import { authorize } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/upload.js";
 
