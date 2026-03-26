@@ -34,6 +34,13 @@ export const createFaqLog = async (req, res) => {
       });
     }
 
+    // do not upadte faqlogs for those had inactive faq
+    if (faq.status !== "active") {
+      return res
+        .status(400)
+        .json({ data: null, success: false, message: "this faq is inactive" });
+    }
+
     // convert to whole seconds
     const durationInSec = Math.floor(duration);
     const videoLengthInSec = Math.floor(faq.videoLength);

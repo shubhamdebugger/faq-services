@@ -1,6 +1,6 @@
 import fs from "fs";
 import mongoose from "mongoose";
-import User from "../models/User.js"
+import User from "../models/User.js";
 import Faq from "../models/Faq.js";
 import Category from "../models/Category.js";
 import { getVideoDurationInSeconds } from "get-video-duration";
@@ -31,10 +31,12 @@ export const createFaq = async (req, res) => {
     }
 
     if (!Array.isArray(tags) || tags.length === 0) {
-      return res.status(400).json({ message: "Tags must be a non-empty array", });
+      return res
+        .status(400)
+        .json({ message: "Tags must be a non-empty array" });
     }
 
-    tags = tags.map(tag => tag.trim().toLowerCase());
+    tags = tags.map((tag) => tag.trim().toLowerCase());
     const tempDir = "./temp";
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -67,11 +69,12 @@ export const createFaq = async (req, res) => {
     });
 
     res.status(201).json({ message: "FAQ created successfully", data: faq });
-
   } catch (error) {
     console.error("Create FAQ Error:", error);
 
-    res.status(500).json({ message: "Internal server error", error: error.message, });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -119,7 +122,6 @@ export const getFaqs = async (req, res) => {
       count: result.length,
       data: result,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -134,7 +136,9 @@ export const getFaqsPerUSer = async (req, res) => {
     }
 
     // Get all FAQs
-    const faqs = await Faq.find({ status: "active" }).sort({ createdAt: -1 }).lean();
+    const faqs = await Faq.find({ status: "active" })
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Get user progress
     const user = await User.findById(userId).lean();
@@ -164,10 +168,45 @@ export const getFaqsPerUSer = async (req, res) => {
       message: "FAQs fetched successfully",
       data: result,
     });
-
   } catch (error) {
     console.error("Get FAQ Error:", error);
 
-    res.status(500).json({ message: "Internal server error", error: error.message, });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+export const updateFaq = async (req, res) => {
+  try {
+    const { faqId } = req.params;
+    if (!faqId) {
+      return res
+        .status(400)
+        .json({ data: null, success: false, message: "missing faqId field" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(faqId)) {
+      return res.status(400).json({ message: "Invalid FAQ id" });
+    }
+    const faq = await Faq.findById(faqId);
+    if (!faq) {
+      return res.status(404).json({
+        success: false,
+        message: "FAQ not found",
+      });
+    }
+    faq.status = faq.status === "active" ? "inactive" : "active";
+    await faq.save();
+    return res.status(200).json({
+      data: null,
+      success: true,
+      message: "faq status updated successfully",
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res
+      .status(400)
+      .json({ data: null, success: false, message: err.message });
   }
 };
