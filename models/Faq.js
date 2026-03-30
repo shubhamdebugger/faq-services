@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const faqSchema = new mongoose.Schema({
+    admin:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Admin'
+    },
     title:{
         type: String,
         required: true

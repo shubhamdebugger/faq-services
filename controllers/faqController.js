@@ -31,9 +31,7 @@ export const createFaq = async (req, res) => {
     }
 
     if (!Array.isArray(tags) || tags.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Tags must be a non-empty array" });
+      return res.status(400).json({ message: "Tags must be a non-empty array" });
     }
 
     tags = tags.map((tag) => tag.trim().toLowerCase());
@@ -60,6 +58,7 @@ export const createFaq = async (req, res) => {
 
     // Save to DB
     const faq = await Faq.create({
+      admin: req.user.id,
       title: title.trim(),
       tags,
       category: categoryId,
@@ -85,7 +84,7 @@ export const getFaqs = async (req, res) => {
     const faqs = await Faq.find().sort({ createdAt: -1 }).lean();
 
     // Get all users with faq progress
-    const users = await User.find({}, { faq: 1, name:1 }).lean();
+    const users = await User.find({}, { faq: 1, name: 1 }).lean();
 
     // Map: faqId -> array of user data
     const faqUserMap = {};
@@ -131,7 +130,7 @@ export const getFaqsPerUSer = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    if(!userId){
+    if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
