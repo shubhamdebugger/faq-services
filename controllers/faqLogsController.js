@@ -34,6 +34,7 @@ export const createFaqLog = async (req, res) => {
       });
     }
 
+
     // do not upadte faqlogs for those had inactive faq
     if (faq.status !== "active") {
       return res

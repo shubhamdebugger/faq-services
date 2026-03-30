@@ -7,6 +7,7 @@ import FaqLogsRoutes from "./routes/faqLogsRoutes.js";
 import FaqRoutes from "./routes/faqRoutes.js";
 import FeedbackRoutes from "./routes/tradeFeedbackRoutes.js";
 import CategoryRoutes from "./routes/categoryRoutes.js";
+import LogoutFeedback from "./routes/logoutFeedbackRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/faqlogs", FaqLogsRoutes);
 app.use("/api/faq-section", FaqRoutes);
 app.use("/api/category", CategoryRoutes);
 app.use("/api/feedback", FeedbackRoutes);
+app.use("/api/logout-feedback", LogoutFeedback);
 
 app.get("/", (req, res) => {
   res.send("FAQ microservices is running....");
