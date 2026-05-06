@@ -1,13 +1,19 @@
 import mongoose from "mongoose";
 
-const categorySchema = new mongoose.Schema(
-  {
-    category: {
-      type: String,
-      required: true,
-    },
+const categorySchema = new mongoose.Schema({
+  value: {
+    type: String,
+    required: true,
   },
-  { timestamps: true },
-);
+  type: {
+    type: String,
+    enum: ["category", "search"],
+    required: true,
+  },
+  count: {
+    type: Number,
+    default: 1,
+  },
+},{timestamps: true});
 
-export default mongoose.model("category", categorySchema);
+export default mongoose.model("Category", categorySchema);
